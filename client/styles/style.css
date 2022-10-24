@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+
+:root {
+  --black: #1E1E1E;
+  --grey: #363636;
+  --light-grey: #C8C8C8;
+  --lighter-grey: #EEEEEE; 
+  --white: #FFFFFF;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  font-family: 'Roboto Slab', serif;
+
+  background-color: inherit;
+  color: inherit;
+}
+
+body {
+  background-color: var(--white) !important;
+  color: var(--black) !important;
+}
+
+body.dark {
+  background-color: var(--black) !important;
+  color: var(--white) !important;
+}
+
+#container {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#content {
+  height: 85%;
+  width: 100%;
+  max-width: 1000px;
+
+  bottom: 45px;
+  top: 45px;
+
+  font-weight: 400;
+  font-size: 1.5em;
+
+  outline: none;
+  border: none;
+  resize: none;
+
+  box-sizing: border-box;
+  padding: 60px 50px 0 50px;
+}
+
+#content::-webkit-scrollbar {
+  display: none;
+}
+
+#counter {
+  position: absolute;
+  bottom: 5px;
+  right: 20px;
+
+  font-size: 1.5em;
+  font-weight: 400;
+  opacity: 45%;
+
+  user-select: none;
+}
+
+#theme {
+  width: 20px;
+  height: 20px;
+
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  border-radius: 100%;
+  background-color: var(--black) !important;
+
+  cursor: pointer;
+}
+
+body.dark #theme {
+  background-color: var(--white) !important;
+}

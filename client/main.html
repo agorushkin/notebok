@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>notebok</title>
+    <link rel="stylesheet" href="/client/styles/style.css" />
+    <link rel="icon" href="/client/assets/favicon.svg" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+
+    <meta property="og:title" content="notebok">
+    <meta property="og:description" content="📔 A small zen mode notebook"> 
+</head>
+<body>
+  <main id="container">
+    <div id="theme"></div>
+    <textarea id="content" placeholder="Just free your flow..." oninput="updateCounter()">{{ text }}</textarea>
+    <h1 id="counter">0, 0</1h>
+  </main>
+  <script>
+    const $ = document.querySelector.bind(document);
+    
+    const body = $('body');
+    const themeButton = $('#theme');
+    const contentField = $('#content');
+    const characterCount = $('#counter');
+
+    let theme = body.classList.contains('dark') ? 'dark' : 'light';
+    
+    const pageUUID = window.location.pathname.split('/').pop();
+    const pageText = contentField.value;
+    
+    const updateCounter = () => {
+      const contentText = contentField.value;
+      characterCount.innerText = `${ contentText.length }, ${ contentText.split(/\s+/).filter(s => s.length).length }`
+    }
+
+    const setTheme = (theme) => {
+      theme === 'dark'
+      ? body.classList.add('dark')
+      : body.classList.remove('dark');
+    }
+    
+    const cycleTheme = () => {
+      theme = theme === 'light' ? 'dark' : 'light';
+      setTheme(theme);
+    }
+    
+    updateCounter();
+    setTheme(theme);
+
+    themeButton.addEventListener('click', cycleTheme);
+    
+    window.onbeforeunload = () => {
+      const currentTheme = $('body').classList.contains('dark') ? 'dark' : 'light';
+
+      fetch(`/save/${ pageUUID }?theme=${ theme }`, {
+        body: contentField.value,
+        method: 'POST',
+      });
+    };
+  </script>
+</body>
+</html>
