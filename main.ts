@@ -4,17 +4,20 @@ import { file } from './src/file.ts';
 
 const server = new WebServer();
 
+const texts: Record<string, string> = {};
+const themes: Record<string, string> = {};
+
 server.use('/')(({ respond }) => {
     respond({ status: 302, headers: { Location: `/${ crypto.randomUUID() }` } });
 });
 
 server.use('/:uuid')(async ({ respond, params }) => {
     const uuid = params.uuid;
-    const load = localStorage.getItem(uuid) || '';
     const html = await file('./client/main.html');
 
     if (html) {
-        const [ theme, text ] = load.split('|') ?? [ 'light', '' ];
+        const text = texts[uuid] || '';
+        const theme = themes[uuid] || 'light';
         let editedHTML = html;
 
         if (theme == 'dark') editedHTML = editedHTML.replace('<body>', '<body class="dark">');
@@ -29,7 +32,8 @@ server.use('/save/:uuid', 'POST')(async ({ body, params, href }) => {
     const text = await body.text();
     const uuid = params.uuid;
 
-    localStorage.setItem(uuid, `${ theme }|${ text }`);
+    texts[uuid] = text;
+    themes[uuid] = theme;
 });
 
 server.static('/client', './client');
