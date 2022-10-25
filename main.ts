@@ -46,6 +46,7 @@ server.use('/ws/:uuid')(async ({ upgrade, params }) => {
   clients[uuid].add(socket);
 
   socket.onmessage = ({ data }) => {
+    texts[uuid] = data;
     [...clients[uuid]].filter(client => client != socket).forEach(client => {
       client.send(data);
     });
