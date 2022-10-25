@@ -1,4 +1,5 @@
-const socket = new WebSocket(`ws://${ window.location.host }/ws/${ pageUUID }`);
+const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const socket = new WebSocket(`${ protocol }://${ window.location.host }/ws/${ pageUUID }`);
 
 socket.onmessage = ({ data }) => {
   contentField.value = data;
