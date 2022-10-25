@@ -13,19 +13,24 @@ const counter = $('#counter');
 const textArea = $('#text');
 const themeButton = $('#theme');
 const uuid = location.pathname.slice(1);
-const createSocket = ()=>new WebSocket(`${protocol}//${window.location.host}/ws/${uuid}`);
-let socket = createSocket();
-socket.onmessage = ({ data  })=>textArea.value = data;
+const socket = new WebSocket(`${protocol}//${window.location.host}/ws/${uuid}`);
+socket.onmessage = ({ data  })=>{
+    const decoded = JSON.parse(data);
+    if (decoded.type === 0) return;
+    textArea.value = decoded.data;
+};
 export { textArea as textArea };
 const updateCounter = ()=>{
     const text = textArea.value;
     counter.textContent = `${text.length}, ${text.split(/\s+/).filter(Boolean).length}`;
 };
-socket.onclose = ()=>socket = createSocket();
 setInterval(()=>socket.send(JSON.stringify({
         type: 0
     })), 10000);
-const sendUpdatedText = ()=>socket.send(textArea.value);
+const sendUpdatedText = ()=>socket.send(JSON.stringify({
+        type: 1,
+        data: textArea.value
+    }));
 textArea.addEventListener('input', ()=>{
     updateCounter();
     sendUpdatedText();

@@ -32,17 +32,21 @@ server.use('/ws/:uuid')(async ({ upgrade, params: { uuid } }) => {
   if (!clients[uuid]) clients[uuid] = new Set();
   clients[uuid].add(socket);
 
-  socket.onmessage = ({ data }) => {
-    const decoded = JSON.parse(data);
+  try {
+    socket.onmessage = ({ data }) => {
+      const decoded = JSON.parse(data);
 
-    if (decoded.type === 0) return socket.send(JSON.stringify({ type: 1 }));
+      if (decoded.type === 0) return socket.send(JSON.stringify({ type: 0 }));
 
-    const text = decoded.data as string;
-    texts[uuid] = text;
-    [...clients[uuid]].filter(client => client != socket).forEach(client => {
-      client.send(text);
-    });
-  };
+      const text = decoded.data as string;
+      texts[uuid] = text;
+      [...clients[uuid]].filter(client => client != socket).forEach(client => {
+        client.send(JSON.stringify({ type: 1, data: text }));
+      });
+    };
+  } catch (_) {
+    socket.close();
+  }
 
   socket.onclose = () => clients[uuid].delete(socket);
 });
