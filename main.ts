@@ -58,9 +58,10 @@ server.use('/save/:uuid', 'POST')(async ({ body, params }) => {
   const text = await body.text();
   const uuid = params.uuid;
 
-  if (texts[uuid] === text || dates[uuid] > Date.now() - 1000 * 60 * 5) return;
-
+  if (texts[uuid] === text) return;
   texts[uuid] = text;
+  
+  if (dates[uuid] > Date.now() - 1000 * 60 * 5) return;
   dates[uuid] = Date.now();
   setText(uuid, text);
 });
