@@ -1,40 +1,70 @@
 import { WebServer } from 'https://agorushkin.deno.dev/modules/http-server';
 
+import { Template } from './src/template.ts';
+import { getText, setText } from './src/storage.ts';
 import { file } from './src/file.ts';
 
 const server = new WebServer();
 
 const texts: Record<string, string> = {};
-const themes: Record<string, string> = {};
+const dates: Record<string, number> = {};
+const stacks: Record<string, [ number, number | string ][]> = {};
+const clients: Record<string, Set<WebSocket>> = {};
 
 server.use('/')(({ respond }) => {
-    respond({ status: 302, headers: { Location: `/${ crypto.randomUUID() }` } });
+  respond({ status: 302, headers: { Location: `/${ crypto.randomUUID() }` } });
 });
 
-server.use('/:uuid')(async ({ respond, params }) => {
-    const uuid = params.uuid;
-    const html = await file('./client/main.html');
+const html = await file('./client/main.html');
 
-    if (html) {
-        const text = texts[uuid] || '';
-        const theme = themes[uuid] || 'light';
-        let editedHTML = html;
+server.use('/:uuid')(async ({ respond, params, headers }) => {
+  if (!html) return respond({ status: 404 });
+  const uuid = params.uuid;
+  
+  const cookie = headers.cookie;
+  const theme  = cookie?.includes('theme=dark') ? 'dark' : 'light';
+  
+  const template = new Template(html);
 
-        if (theme == 'dark') editedHTML = editedHTML.replace('<body>', '<body class="dark">');
-        editedHTML = editedHTML.replace('{{ text }}', text);
-        respond({ body: editedHTML, headers: { 'Content-Type': 'text/html' } });
-    } else respond({ status: 404 });
+  const text = texts[uuid] ?? await getText(uuid) ?? '';
+  
+  if (theme == 'dark') template.insert('class="dark"', 'theme');
+  template.insert(text, 'text');
+  template.clear();
+  respond({ body: template.text, headers: { 'Content-Type': 'text/html' } });
 });
 
-server.use('/save/:uuid', 'POST')(async ({ body, params, href }) => {
-    const query = new URLSearchParams(href.split('?')[1]);
-    const theme = query.get('theme') == 'dark' ? 'dark' : 'light';
-    const text = await body.text();
-    const uuid = params.uuid;
+server.use('/ws/:uuid')(async ({ upgrade, params }) => {
+  const socket = await upgrade();
 
-    texts[uuid] = text;
-    themes[uuid] = theme;
+  if (!socket) return;
+
+  const uuid = params.uuid;
+
+  if (!clients[uuid]) clients[uuid] = new Set();
+
+  clients[uuid].add(socket);
+
+  socket.onmessage = ({ data }) => {
+    [...clients[uuid]].filter(client => client != socket).forEach(client => {
+      client.send(data);
+    });
+  };
+
+  socket.onclose = () => clients[uuid].delete(socket);
+});
+
+server.use('/save/:uuid', 'POST')(async ({ body, params }) => {
+  const text = await body.text();
+  const uuid = params.uuid;
+
+  if (texts[uuid] === text || dates[uuid] > Date.now() - 1000 * 60 * 5) return;
+
+  texts[uuid] = text;
+  dates[uuid] = Date.now();
+  setText(uuid, text);
 });
 
 server.static('/client', './client');
-server.open(8080);
+server.open(8000);
+console.log('Server running on http://localhost:8000');
