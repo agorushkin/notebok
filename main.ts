@@ -1,70 +1,57 @@
 import { WebServer } from 'https://agorushkin.deno.dev/modules/http-server';
+import { render } from 'preact/render';
 
-import { Template } from './src/template.ts';
-import { getText, setText } from './src/storage.ts';
-import { file } from './src/file.ts';
+import MainPage from './client/main.tsx';
 
 const server = new WebServer();
 
 const texts: Record<string, string> = {};
-const dates: Record<string, number> = {};
-const stacks: Record<string, [ number, number | string ][]> = {};
 const clients: Record<string, Set<WebSocket>> = {};
 
 server.use('/')(({ respond }) => {
   respond({ status: 302, headers: { Location: `/${ crypto.randomUUID() }` } });
 });
 
-const html = await file('./client/main.html');
-
-server.use('/:uuid')(async ({ respond, params, headers }) => {
-  if (!html) return respond({ status: 404 });
-  const uuid = params.uuid;
-  
+server.use('/:uuid')(({ respond, params: { uuid }, headers }) => {
   const cookie = headers.cookie;
-  const theme  = cookie?.includes('theme=dark') ? 'dark' : 'light';
-  
-  const template = new Template(html);
+  const dark   = cookie?.includes('theme=dark');
 
-  const text = texts[uuid] ?? await getText(uuid) ?? '';
-  
-  if (theme == 'dark') template.insert('class="dark"', 'theme');
-  template.insert(text, 'text');
-  template.clear();
-  respond({ body: template.text, headers: { 'Content-Type': 'text/html' } });
+  const text = texts[uuid] || '';
+  const page = MainPage(text, dark);
+
+  respond({
+    body: render(page),
+    headers: { 'Content-Type': 'text/html' }
+  });
 });
 
-server.use('/ws/:uuid')(async ({ upgrade, params }) => {
+server.use('/ws/:uuid')(async ({ upgrade, params: { uuid } }) => {
   const socket = await upgrade();
-
   if (!socket) return;
 
-  const uuid = params.uuid;
-
   if (!clients[uuid]) clients[uuid] = new Set();
-
   clients[uuid].add(socket);
 
   socket.onmessage = ({ data }) => {
-    texts[uuid] = data;
+    const decoded = JSON.parse(data);
+
+    if (decoded.type === 0) return socket.send(JSON.stringify({ type: 1 }));
+
+    const text = decoded.data as string;
+    texts[uuid] = text;
     [...clients[uuid]].filter(client => client != socket).forEach(client => {
-      client.send(data);
+      client.send(text);
     });
   };
 
   socket.onclose = () => clients[uuid].delete(socket);
 });
 
-server.use('/save/:uuid', 'POST')(async ({ body, params }) => {
+server.use('/save/:uuid', 'POST')(async ({ body, params: { uuid } }) => {
   const text = await body.text();
-  const uuid = params.uuid;
 
   if (texts[uuid] === text) return;
   texts[uuid] = text;
-  
-  if (dates[uuid] > Date.now() - 1000 * 60 * 5) return;
-  dates[uuid] = Date.now();
-  setText(uuid, text);
 });
 
 server.static('/client', './client');
