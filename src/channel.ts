@@ -2,7 +2,7 @@ import {
   PayloadType,
   createPayload,
   parsePayload
-} from '/src/payload.ts';
+} from './payload.ts';
 
 export class Channel {
   #clients = new Set<WebSocket>();

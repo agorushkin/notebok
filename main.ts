@@ -1,7 +1,7 @@
 import { WebServer } from 'server';
 import { Channel } from './src/channel.ts';
 
-import { template as MainPage } from '/client/main.tsx';
+import { template as MainPage } from './client/main.tsx';
 import { render } from 'preact/render';
 
 import { validateUUID } from './src/validate-uuid.ts';

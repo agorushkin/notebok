@@ -1,8 +1,6 @@
 {
   "imports": {
     "server": "https://agorushkin.deno.dev/modules/http-server",
-    "/": "./",
-    "./": "./",
     "preact": "https://esm.sh/preact",
     "preact/": "https://esm.sh/preact/",
     "preact/render": "https://esm.sh/preact-render-to-string"

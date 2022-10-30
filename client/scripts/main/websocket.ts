@@ -5,7 +5,7 @@ import {
   PayloadType,
   createPayload,
   parsePayload
-} from '/src/payload.ts';
+} from '../../../src/payload.ts';
 
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
