@@ -29,7 +29,7 @@ socket.addEventListener('message', (event) => {
 
     case PayloadType.Data:
       setText(data);
-      updateCounter();
+      updateCounter(data);
       break;
 
     case PayloadType.Error:

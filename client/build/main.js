@@ -39,8 +39,7 @@ const counter = $('#counter');
 const textField = $('#text');
 const themeButton = $('#theme');
 const uuid = location.pathname.slice(1);
-const updateCounter = ()=>{
-    const text = textField.value;
+const updateCounter = (text)=>{
     counter.textContent = `${text.length}, ${text.split(/\s+/).filter(Boolean).length}`;
 };
 const getText = ()=>{
@@ -50,7 +49,7 @@ const setText = (text)=>{
     $('#text').value = text;
 };
 textField.addEventListener('input', ()=>{
-    updateCounter();
+    updateCounter(getText());
 });
 const cycleTheme = ()=>{
     body.classList.contains('dark') ? setTheme('light') : setTheme('dark');
@@ -72,7 +71,7 @@ socket.addEventListener('message', (event)=>{
             break;
         case PayloadType.Data:
             setText(data);
-            updateCounter();
+            updateCounter(data);
             break;
         case PayloadType.Error:
             console.error(data);

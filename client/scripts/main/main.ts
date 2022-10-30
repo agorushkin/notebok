@@ -16,9 +16,7 @@ export const themeButton = $('#theme')!;
 
 export const uuid = location.pathname.slice(1);
 
-export const updateCounter = () => {
-  const text = textField.value;
-
+export const updateCounter = (text: string) => {
   counter.textContent = `${ text.length }, ${ text.split(/\s+/).filter(Boolean).length }`;
 };
 
@@ -31,7 +29,7 @@ export const setText = (text: string) => {
 };
 
 textField.addEventListener('input', () => {
-  updateCounter();
+  updateCounter(getText());
 });
 
 themeButton.addEventListener('click', () => {
