@@ -5,25 +5,33 @@
 /// <reference lib="deno.ns" />
 
 import { cycleTheme } from './theme.ts';
-import { sendUpdatedText } from './websocket.ts';
+import './websocket.ts';
 
 const $ = document.querySelector.bind(document);
 
 export const body        = $('body')!;
 export const counter     = $('#counter')!;
-export const textArea    = $('#text')! as HTMLTextAreaElement;
+export const textField   = $('#text')! as HTMLTextAreaElement;
 export const themeButton = $('#theme')!;
 
 export const uuid = location.pathname.slice(1);
 
-const updateCounter = () => {
-  const text = textArea.value;
+export const updateCounter = () => {
+  const text = textField.value;
+
   counter.textContent = `${ text.length }, ${ text.split(/\s+/).filter(Boolean).length }`;
 };
 
-textArea.addEventListener('input', () => {
+export const getText = () => {
+  return ($('#text') as HTMLTextAreaElement).value;
+};
+
+export const setText = (text: string) => {
+  ($('#text') as HTMLTextAreaElement).value = text;
+};
+
+textField.addEventListener('input', () => {
   updateCounter();
-  sendUpdatedText();
 });
 
 themeButton.addEventListener('click', () => {

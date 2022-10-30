@@ -1,4 +1,4 @@
-export default function (text: string, dark: boolean) {
+export const template = (text: string, dark: boolean) => {
   return (
     <>
       <head lang='en'>
@@ -19,7 +19,7 @@ export default function (text: string, dark: boolean) {
             id='text'
             placeholder='Just start typing...'
           >{ text }</textarea>
-          <h1 id='counter'></h1>
+          <h1 id='counter'>{ `${ text.length }, ${ text.split(/\s+/).filter(Boolean).length }` }</h1>
         </main>
         <script src='/client/build/main.js' type='module'></script>
       </body>
