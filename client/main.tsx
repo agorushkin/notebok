@@ -10,19 +10,23 @@ export const template = (text: string, dark: boolean) => {
         <meta charSet='UTF-8' />
 
         <meta property='og:title' content='notebok' />
-        <meta property='og:description' content='📔 A small zen mode notebook' /> 
+        <meta property='og:description' content='📔 A small zen mode notebook' />
       </head>
-      <body class={ dark ? 'dark' : '' }>
+      <body class={dark ? 'dark' : ''}>
         <main id='container'>
           <div id='theme'></div>
           <textarea
             id='text'
             placeholder='Just start typing...'
-          >{ text }</textarea>
-          <h1 id='counter'>{ `${ text.length }, ${ text.split(/\s+/).filter(Boolean).length }` }</h1>
+          >
+            {text}
+          </textarea>
+          <h1 id='counter'>
+            {`${text.length}, ${text.split(/\s+/).filter(Boolean).length}`}
+          </h1>
         </main>
         <script src='/client/build/main.js' type='module'></script>
       </body>
     </>
   );
-}
+};

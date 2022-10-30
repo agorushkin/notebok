@@ -9,15 +9,17 @@ import './websocket.ts';
 
 const $ = document.querySelector.bind(document);
 
-export const body        = $('body')!;
-export const counter     = $('#counter')!;
-export const textField   = $('#text')! as HTMLTextAreaElement;
+export const body = $('body')!;
+export const counter = $('#counter')!;
+export const textField = $('#text')! as HTMLTextAreaElement;
 export const themeButton = $('#theme')!;
 
 export const uuid = location.pathname.slice(1);
 
 export const updateCounter = (text: string) => {
-  counter.textContent = `${ text.length }, ${ text.split(/\s+/).filter(Boolean).length }`;
+  counter.textContent = `${text.length}, ${
+    text.split(/\s+/).filter(Boolean).length
+  }`;
 };
 
 export const getText = () => {

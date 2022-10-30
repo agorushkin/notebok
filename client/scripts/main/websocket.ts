@@ -1,15 +1,17 @@
-import { textField, uuid, getText, setText } from './main.ts';
+import { getText, setText, textField, uuid } from './main.ts';
 import { updateCounter } from './main.ts';
 
 import {
-  PayloadType,
   createPayload,
-  parsePayload
+  parsePayload,
+  PayloadType,
 } from '../../../src/payload.ts';
 
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
-let socket = new WebSocket(`${ protocol }//${ window.location.host }/${ uuid }/connect`);
+let socket = new WebSocket(
+  `${protocol}//${window.location.host}/${uuid}/connect`,
+);
 
 const send = (type: PayloadType, data = '') => {
   socket.send(createPayload(type, data));
@@ -39,7 +41,9 @@ socket.addEventListener('message', (event) => {
 
 socket.onclose = () => {
   const interval = setInterval(() => {
-    socket = new WebSocket(`${ protocol }//${ window.location.host }/${ uuid }/connect`);
+    socket = new WebSocket(
+      `${protocol}//${window.location.host}/${uuid}/connect`,
+    );
 
     socket.onopen = () => {
       clearInterval(interval);

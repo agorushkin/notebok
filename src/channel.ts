@@ -1,8 +1,4 @@
-import {
-  PayloadType,
-  createPayload,
-  parsePayload
-} from './payload.ts';
+import { createPayload, parsePayload, PayloadType } from './payload.ts';
 
 export class Channel {
   #clients = new Set<WebSocket>();
@@ -24,7 +20,7 @@ export class Channel {
     this.#unresponded = new Set(this.#clients);
 
     this.send(PayloadType.Ping);
-  }
+  };
 
   send = (type: PayloadType, data = '') => {
     const payload = createPayload(type, data);
@@ -32,7 +28,7 @@ export class Channel {
     for (const client of this.#clients) {
       if (client.readyState === client.OPEN) client.send(payload);
     }
-  }
+  };
 
   connect = (client: WebSocket) => {
     this.#clients.add(client);
@@ -54,12 +50,12 @@ export class Channel {
 
         default:
           this.disconnect(client);
-        }
+      }
     };
-  }
+  };
 
   disconnect = (client: WebSocket) => {
     this.#clients.delete(client);
     client.close();
-  }
+  };
 }
