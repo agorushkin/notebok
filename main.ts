@@ -1,5 +1,5 @@
 import { WebServer } from 'server';
-import { Channel } from '/src/channel.ts';
+import { Channel } from './src/channel.ts';
 
 import { template as MainPage } from '/client/main.tsx';
 import { render } from 'preact/render';
