@@ -8,10 +8,16 @@
   --white: #FFFFFF;
 }
 
+@media (max-width: 768px) {
+  #content {
+    font-size: 1rem !important;
+  }
+}
+
 html, body {
   height: 100%;
   width: 100%;
-  
+
   margin: 0;
   padding: 0;
 }
@@ -42,7 +48,7 @@ body.dark {
   align-items: center;
 }
 
-#content {
+#text {
   height: 85%;
   width: 100%;
   max-width: 1000px;
@@ -61,7 +67,7 @@ body.dark {
   padding: 60px 50px 0 50px;
 }
 
-#content::-webkit-scrollbar {
+#text::-webkit-scrollbar {
   display: none;
 }
 
@@ -70,7 +76,7 @@ body.dark {
   bottom: 5px;
   right: 20px;
 
-  font-size: 1.5em;
+  font-size: 1em;
   font-weight: 400;
   opacity: 45%;
 

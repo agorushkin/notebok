@@ -1,40 +1,48 @@
-import { WebServer } from 'https://agorushkin.deno.dev/modules/http-server';
+import { WebServer } from 'server';
+import { Channel } from './src/channel.ts';
 
-import { file } from './src/file.ts';
+import { template as MainPage } from './client/main.tsx';
+import { render } from 'preact/render';
+
+import { validateUUID } from './src/validate-uuid.ts';
 
 const server = new WebServer();
 
-const texts: Record<string, string> = {};
-const themes: Record<string, string> = {};
-
-server.use('/')(({ respond }) => {
-    respond({ status: 302, headers: { Location: `/${ crypto.randomUUID() }` } });
-});
-
-server.use('/:uuid')(async ({ respond, params }) => {
-    const uuid = params.uuid;
-    const html = await file('./client/main.html');
-
-    if (html) {
-        const text = texts[uuid] || '';
-        const theme = themes[uuid] || 'light';
-        let editedHTML = html;
-
-        if (theme == 'dark') editedHTML = editedHTML.replace('<body>', '<body class="dark">');
-        editedHTML = editedHTML.replace('{{ text }}', text);
-        respond({ body: editedHTML, headers: { 'Content-Type': 'text/html' } });
-    } else respond({ status: 404 });
-});
-
-server.use('/save/:uuid', 'POST')(async ({ body, params, href }) => {
-    const query = new URLSearchParams(href.split('?')[1]);
-    const theme = query.get('theme') == 'dark' ? 'dark' : 'light';
-    const text = await body.text();
-    const uuid = params.uuid;
-
-    texts[uuid] = text;
-    themes[uuid] = theme;
-});
+const channels = new Map<string, Channel>();
 
 server.static('/client', './client');
-server.open(8080);
+
+server.use('/', 'GET', ({ respond }) => {
+  const uuid = crypto.randomUUID();
+
+  respond({ status: 302, headers: { location: `/${uuid}` } });
+});
+
+server.use('/:uuid/*', 'GET', ({ respond, params: { uuid } }) => {
+  if (!validateUUID(uuid)) return respond({ status: 404 });
+
+  const channel = new Channel();
+  if (!channels.has(uuid)) channels.set(uuid, channel);
+});
+
+server.use('/:uuid', 'GET', ({ respond, headers, params: { uuid } }) => {
+  const cookie = headers.cookie;
+  const dark = cookie?.includes('theme=dark');
+
+  const text = channels.get(uuid)?.data || '';
+  const page = MainPage(text, dark);
+
+  respond({
+    body: render(page),
+    headers: { 'content-type': 'text/html' },
+  });
+});
+
+server.use('/:uuid/connect', 'GET', async ({ upgrade, params: { uuid } }) => {
+  const client = await upgrade();
+
+  if (client) channels.get(uuid)?.connect(client);
+});
+
+server.open(8000);
+console.log('Server running on http://localhost:8000');
