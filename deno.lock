@@ -1,0 +1,20 @@
+{
+  "version": "2",
+  "remote": {
+    "https://esm.sh/preact-render-to-string@6.0.3": "4b772dd3f59ca74c0c4412184575df65532cb8c18e9c6169eb9c1ce6f3e6a076",
+    "https://esm.sh/preact@10.14.1/jsx-runtime": "b5e31d4613b444be68d3252b58279b3d91752eabf9f12ec3b2c89991ae06a1f4",
+    "https://esm.sh/stable/preact@10.14.1/deno/jsx-runtime.js": "44950cdad767f2e07ae45e6c94f24c1342f273dde124037d7d4f00e9ec46a6a6",
+    "https://esm.sh/stable/preact@10.14.1/deno/preact.mjs": "f51b1a99f29fa9879d70dc283bb8f42ce9beef99aa93dd6ca969f297e101e964",
+    "https://esm.sh/v118/preact@10.14.1/jsx-runtime/src/index.d.ts": "e153460ed2b3fe2ad8b93696ecd48fbf73cd628b0b0ea6692b71804a3af69dfd",
+    "https://esm.sh/v118/preact@10.14.1/src/index.d.ts": "65398710de6aa0a07412da79784e05e6e96763f51c7c91b77344d2d0af06385c",
+    "https://esm.sh/v118/preact@10.14.1/src/jsx.d.ts": "de467cd980f79a13bf3026146afed7173a3634e7d6415d349184663c67174c0c",
+    "https://esm.sh/v122/preact-render-to-string@6.0.3/deno/preact-render-to-string.mjs": "dda09d9edbde6f53ad16b8981fdf3fff3ea7a9c1831849118caae6aec88009b1",
+    "https://esm.sh/v122/preact-render-to-string@6.0.3/src/index.d.ts": "c0b0d641b417f7586d9323d90006d2ac605864f13d4294ea45088bb3c71a76db",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/lib/constants.ts": "0c8b4a7b49836f62ae2577829113e4d5eec25936fd5ea44a57206460fa6aeb93",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/lib/event.ts": "487516156e0f33bd1fc7f22522b29b309dee429f5866f0d819900fcecc5956f8",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/lib/listen.ts": "bffb9f8b7ded018947866cba6429224bdfcff2b325e5ce7ce04ec2c39af950de",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/lib/server.ts": "977281f44a46394b085815ee977be0b5d8995997ffcd6f9abd2e7a7eaa842f5b",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/lib/utils.ts": "6adad557c3baed2cbce8ad52c50991b373c9ffcd2962bc9f389707d45f163328",
+    "https://raw.githubusercontent.com/agorushkin/http-server/master/mod.ts": "bdd29666f084bfd692f02099000a2154ee93d9b0b7414360c94600e4e2a930f6"
+  }
+}

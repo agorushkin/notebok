@@ -10,24 +10,26 @@ export interface Payload {
   data: string;
 }
 
-export const createPayload = (type: PayloadType, data = '') => {
-  return JSON.stringify({ type, data });
-};
+export class Payload {
+  static create = (type: PayloadType, data = '') => {
+    return JSON.stringify({ type, data });
+  };
 
-export const validatePayload = (payload: unknown): payload is Payload => {
-  if (typeof payload !== 'object' || payload === null) return false;
+  static validate = (payload: unknown): payload is Payload => {
+    if (typeof payload !== 'object' || payload === null) return false;
 
-  const { type, data } = payload as Payload;
+    const { type, data } = payload as Payload;
 
-  return typeof type === 'number' && typeof data === 'string';
-};
+    return typeof type === 'number' && typeof data === 'string';
+  };
 
-export const parsePayload = (data: unknown): Payload | null => {
-  try {
-    data = JSON.parse(`${data}`);
-  } catch {
-    data = null;
-  }
+  static parse = (data: unknown): Payload | null => {
+    try {
+      data = JSON.parse(`${data}`);
+    } catch {
+      data = null;
+    }
 
-  return validatePayload(data) ? data : null;
-};
+    return Payload.validate(data) ? data : null;
+  };
+}

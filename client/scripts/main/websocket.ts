@@ -1,53 +1,42 @@
 import { getText, setText, textField, uuid } from './main.ts';
 import { updateCounter } from './main.ts';
 
-import {
-  createPayload,
-  parsePayload,
-  PayloadType,
-} from '../../../src/payload.ts';
+import { Payload, PayloadType } from '/src/payload.ts';
+
 
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const address = `${ protocol }//${ window.location.host }/${ uuid }`;
 
-let socket = new WebSocket(
-  `${protocol}//${window.location.host}/${uuid}/connect`,
-);
+let socket = new WebSocket(address);
 
 const send = (type: PayloadType, data = '') => {
-  socket.send(createPayload(type, data));
+  socket.send(Payload.create(type, data));
 };
 
-socket.addEventListener('message', (event) => {
-  const payload = parsePayload(event.data);
+socket.onmessage = ({ data }) => {
+  const payload = Payload.parse(data)!;
 
-  if (!payload) return;
-
-  const { type, data } = payload;
-
-  switch (type) {
-    case PayloadType.Ping:
+  ({
+    [ payload.type ]: () => {},
+    [ PayloadType.Ping ]: () => {
       send(PayloadType.Pong);
-      break;
+    },
 
-    case PayloadType.Data:
-      setText(data);
-      updateCounter(data);
-      break;
+    [ PayloadType.Data ]: () => {
+      console.log(payload.data);
+      setText(payload.data);
+      updateCounter(payload.data);
+    },
 
-    case PayloadType.Error:
-      console.error(data);
-  }
-});
+  })[ payload.type ]();
+};
 
 socket.onclose = () => {
   const interval = setInterval(() => {
-    socket = new WebSocket(
-      `${protocol}//${window.location.host}/${uuid}/connect`,
-    );
+    if (socket.readyState !== socket.CLOSED) return;
+    socket = new WebSocket(address);
 
-    socket.onopen = () => {
-      clearInterval(interval);
-    };
+    socket.onopen = () => { clearInterval(interval) };
   }, 2000);
 };
 

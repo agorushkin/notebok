@@ -1,33 +1,33 @@
-import { WebServer } from 'server';
-import { Channel } from './src/channel.ts';
+import { HttpServer, files } from 'server';
+import { Channel } from '/src/channel.ts';
+import { Client } from '/src/client.ts';
 
 import { template as MainPage } from './client/main.tsx';
 import { render } from 'preact/render';
 
 import { validateUUID } from './src/validate-uuid.ts';
 
-const server = new WebServer();
+const server = new HttpServer();
 
 const channels = new Map<string, Channel>();
 
-server.static('/client', './client');
-
-server.use('/', 'GET', ({ respond }) => {
+server.route('/', 'GET')(({ respond }) => {
   const uuid = crypto.randomUUID();
 
-  respond({ status: 302, headers: { location: `/${uuid}` } });
+  respond({ status: 302, headers: { location: `/${ uuid }` } });
 });
 
-server.use('/:uuid/*', 'GET', ({ respond, params: { uuid } }) => {
-  if (!validateUUID(uuid)) return respond({ status: 404 });
-
-  const channel = new Channel();
-  if (!channels.has(uuid)) channels.set(uuid, channel);
+server.route('/:uuid')(({ params: { uuid } }) => {
+  if (!uuid || !validateUUID(uuid)) return;
+  if (!channels.has(uuid)) channels.set(uuid, new Channel());
 });
 
-server.use('/:uuid', 'GET', ({ respond, headers, params: { uuid } }) => {
-  const cookie = headers.cookie;
-  const dark = cookie?.includes('theme=dark');
+server.route('/:uuid')(({ respond, headers, cookies, params: { uuid } }) => {
+  if (!uuid || !validateUUID(uuid)) return;
+
+  const dark = cookies?.theme === 'dark';
+
+  if (headers?.upgrade) return;
 
   const text = channels.get(uuid)?.data || '';
   const page = MainPage(text, dark);
@@ -38,11 +38,18 @@ server.use('/:uuid', 'GET', ({ respond, headers, params: { uuid } }) => {
   });
 });
 
-server.use('/:uuid/connect', 'GET', async ({ upgrade, params: { uuid } }) => {
-  const client = await upgrade();
+server.route('/:uuid')(async ({ upgrade, headers, params: { uuid } }) => {
+  if (!uuid || !validateUUID(uuid)) return;
 
-  if (client) channels.get(uuid)?.connect(client);
+  if (!headers?.upgrade) return;
+
+  const client = await upgrade();
+  if (client) channels.get(uuid)?.connect(new Client(client));
 });
 
-server.open(8000);
+server.route('/*')(({ respond }) => { respond({ status: 400 }) });
+
+server.plugin(files('/client/', './client/'));
+
+server.listen(8000);
 console.log('Server running on http://localhost:8000');

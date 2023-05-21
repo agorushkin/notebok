@@ -1,61 +1,28 @@
-import { createPayload, parsePayload, PayloadType } from './payload.ts';
+import { Payload } from './payload.ts';
+import { Client } from '/src/client.ts';
 
 export class Channel {
-  #clients = new Set<WebSocket>();
-  #unresponded = new Set<WebSocket>();
+  #clients = new Set<Client>();
+  data     = '';
 
-  data = '';
+  broadcast = (payload: string) => {
+    const { data } = Payload.parse(payload)!;
+    this.data = data;
 
-  constructor() {
-    setInterval(this.heartbeat, 5000);
+    for (const client of this.#clients) client.send(payload);
   }
 
-  private heartbeat = () => {
-    for (const client of this.#clients) {
-      if (this.#unresponded.has(client)) {
-        this.disconnect(client);
-      }
-    }
+  connect = (client: Client) => {
+    const heartbeat = setInterval(client.heartbeat, 3000);
 
-    this.#unresponded = new Set(this.#clients);
-
-    this.send(PayloadType.Ping);
-  };
-
-  send = (type: PayloadType, data = '') => {
-    const payload = createPayload(type, data);
-
-    for (const client of this.#clients) {
-      if (client.readyState === client.OPEN) client.send(payload);
-    }
-  };
-
-  connect = (client: WebSocket) => {
     this.#clients.add(client);
 
-    client.onmessage = ({ data }) => {
-      const payload = parsePayload(data);
-
-      if (!payload) return;
-
-      switch (payload.type) {
-        case PayloadType.Pong:
-          this.#unresponded.delete(client);
-          break;
-
-        case PayloadType.Data:
-          this.send(PayloadType.Data, payload.data);
-          this.data = payload.data;
-          break;
-
-        default:
-          this.disconnect(client);
-      }
-    };
-  };
-
-  disconnect = (client: WebSocket) => {
-    this.#clients.delete(client);
-    client.close();
+    client.on('close', () => {
+      clearInterval(heartbeat);
+      this.#clients.delete(client);
+    });
+    client.on('receive', (payload) => {
+      this.broadcast(payload);
+    });
   };
 }

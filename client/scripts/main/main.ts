@@ -4,7 +4,7 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import { cycleTheme } from './theme.ts';
+import { toggleTheme } from './theme.ts';
 import './websocket.ts';
 
 const $ = document.querySelector.bind(document);
@@ -34,6 +34,4 @@ textField.addEventListener('input', () => {
   updateCounter(getText());
 });
 
-themeButton.addEventListener('click', () => {
-  cycleTheme();
-});
+themeButton.addEventListener('click', toggleTheme);

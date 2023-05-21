@@ -9,30 +9,31 @@ var PayloadType;
     PayloadType[PayloadType["Data"] = 0x02] = "Data";
     PayloadType[PayloadType["Error"] = 0x03] = "Error";
 })(PayloadType || (PayloadType = {}));
-const createPayload = (type, data = '')=>{
-    return JSON.stringify({
-        type,
-        data
-    });
-};
-const validatePayload = (payload)=>{
-    if (typeof payload !== 'object' || payload === null) return false;
-    const { type , data  } = payload;
-    return typeof type === 'number' && typeof data === 'string';
-};
-const parsePayload = (data)=>{
-    try {
-        data = JSON.parse(`${data}`);
-    } catch  {
-        data = null;
-    }
-    return validatePayload(data) ? data : null;
-};
+class Payload {
+    static create = (type, data = '')=>{
+        return JSON.stringify({
+            type,
+            data
+        });
+    };
+    static validate = (payload)=>{
+        if (typeof payload !== 'object' || payload === null) return false;
+        const { type , data  } = payload;
+        return typeof type === 'number' && typeof data === 'string';
+    };
+    static parse = (data)=>{
+        try {
+            data = JSON.parse(`${data}`);
+        } catch  {
+            data = null;
+        }
+        return Payload.validate(data) ? data : null;
+    };
+}
 const $ = document.querySelector.bind(document);
 const body = $('body');
-const setTheme = (theme)=>{
-    theme === 'dark' ? body.classList.add('dark') : body.classList.remove('dark');
-    document.cookie = `theme=${theme}; path=/; max-age=31536000`;
+const toggleTheme = ()=>{
+    body.classList.toggle('dark');
 };
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const counter = $('#counter');
@@ -51,35 +52,30 @@ const setText = (text)=>{
 textField.addEventListener('input', ()=>{
     updateCounter(getText());
 });
-const cycleTheme = ()=>{
-    body.classList.contains('dark') ? setTheme('light') : setTheme('dark');
-};
-themeButton.addEventListener('click', ()=>{
-    cycleTheme();
-});
-let socket = new WebSocket(`${protocol}//${window.location.host}/${uuid}/connect`);
+themeButton.addEventListener('click', toggleTheme);
+const address = `${protocol}//${window.location.host}/${uuid}`;
+let socket = new WebSocket(address);
 const send = (type, data = '')=>{
-    socket.send(createPayload(type, data));
+    socket.send(Payload.create(type, data));
 };
-socket.addEventListener('message', (event)=>{
-    const payload = parsePayload(event.data);
-    if (!payload) return;
-    const { type , data  } = payload;
-    switch(type){
-        case PayloadType.Ping:
+socket.onmessage = ({ data  })=>{
+    const payload = Payload.parse(data);
+    ({
+        [payload.type]: ()=>{},
+        [PayloadType.Ping]: ()=>{
             send(PayloadType.Pong);
-            break;
-        case PayloadType.Data:
-            setText(data);
-            updateCounter(data);
-            break;
-        case PayloadType.Error:
-            console.error(data);
-    }
-});
+        },
+        [PayloadType.Data]: ()=>{
+            console.log(payload.data);
+            setText(payload.data);
+            updateCounter(payload.data);
+        }
+    })[payload.type]();
+};
 socket.onclose = ()=>{
     const interval = setInterval(()=>{
-        socket = new WebSocket(`${protocol}//${window.location.host}/${uuid}/connect`);
+        if (socket.readyState !== socket.CLOSED) return;
+        socket = new WebSocket(address);
         socket.onopen = ()=>{
             clearInterval(interval);
         };
