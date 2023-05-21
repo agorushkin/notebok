@@ -1,5 +1,5 @@
 import { Payload } from './payload.ts';
-import { Client } from '/src/client.ts';
+import { Client } from './client.ts';
 
 export class Channel {
   #clients = new Set<Client>();

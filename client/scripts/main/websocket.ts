@@ -1,7 +1,7 @@
 import { getText, setText, textField, uuid } from './main.ts';
 import { updateCounter } from './main.ts';
 
-import { Payload, PayloadType } from '/src/payload.ts';
+import { Payload, PayloadType } from '../../../src/payload.ts';
 
 
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

@@ -1,4 +1,4 @@
-import { Payload, PayloadType } from '/src/payload.ts';
+import { Payload, PayloadType } from './payload.ts';
 
 interface Events {
   'close': () => void;

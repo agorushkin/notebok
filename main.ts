@@ -1,6 +1,6 @@
 import { HttpServer, files } from 'server';
-import { Channel } from '/src/channel.ts';
-import { Client } from '/src/client.ts';
+import { Channel } from './src/channel.ts';
+import { Client } from './src/client.ts';
 
 import { template as MainPage } from './client/main.tsx';
 import { render } from 'preact/render';
