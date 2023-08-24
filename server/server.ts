@@ -8,19 +8,20 @@ const clients  = new Map<string, WebSocket[]>();
 const channels = new Map<string, string>();
 const channel  = Deno.env.get('DEPLOY') === 'true' ? new BroadcastChannel('network') : null;
 const server   = new Server();
+const region   = Deno.env.get('DENO_REGION');
 
-if (channel) channel.onmessage = ({ data: { uuid, text, region } }) => {
-  if (region === Deno.env.get('DENO_REGION')) return;
+if (channel) channel.onmessage = ({ data: { uuid, text, regions } }) => {
+  if (regions.includes(region)) return;
   if (channels.get(uuid) === text) return;
 
-  broadcast(uuid, text);
+  broadcast(uuid, text, [ ...regions, region ]);
 };
 
-const broadcast = (uuid: string, text: string) => {
+const broadcast = (uuid: string, text: string, regions: string[] = []) => {
   const [ ...sockets ] = clients.get(uuid) ?? [];
 
   for (const socket of sockets) socket.send(text);
-  channel?.postMessage({ uuid, text, region: Deno.env.get('DENO_REGION') });
+  channel?.postMessage({ uuid, text, regions });
 
   channels.set(uuid, text);
 };
@@ -60,4 +61,4 @@ server.get('/:uuid', ({ respond, params: { uuid }, cookies: { theme }, headers }
 server.get('/public/*', serve('./public/'));
 
 server.listen(8000);
-console.log(`Server running on ${ Deno.env.get('DENO_REGION') }`);
+console.log(`Server running on ${ region }`);
