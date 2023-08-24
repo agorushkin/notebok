@@ -10,7 +10,7 @@ const themeButton = $('#theme');
 const uuid = location.pathname.slice(1);
 const connect = ()=>{
     const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
-    textField.oninput = ()=>socket.send(getText());
+    textField.addEventListener('input', ()=>socket.send(getText()));
     socket.onclose = ()=>setTimeout(connect, 2000);
     socket.onmessage = ({ data })=>{
         setText(data);
@@ -27,7 +27,9 @@ const setText = (text)=>{
     $('#text').value = text;
     updateCounter(text);
 };
-textField.oninput = ()=>updateCounter(getText());
+textField.addEventListener('input', ()=>{
+    updateCounter(textField.value);
+});
 themeButton.addEventListener('click', ()=>{
     body.classList.toggle('dark');
     document.cookie = `theme=${body.classList.contains('dark') ? 'dark' : 'light'}; path=/`;
