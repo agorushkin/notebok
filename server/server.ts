@@ -9,13 +9,18 @@ const channels = new Map<string, string>();
 const channel  = Deno.env.get('DEPLOY') === 'true' ? new BroadcastChannel('network') : null;
 const server   = new Server();
 
-if (channel) channel.onmessage = ({ data: { uuid, text } }) => broadcast(uuid, text);
+if (channel) channel.onmessage = ({ data: { uuid, text, region } }) => {
+  if (region === Deno.env.get('DENO_REGION')) return;
+  if (channels.get(uuid) === text) return;
+
+  broadcast(uuid, text);
+};
 
 const broadcast = (uuid: string, text: string) => {
   const [ ...sockets ] = clients.get(uuid) ?? [];
 
   for (const socket of sockets) socket.send(text);
-  channel?.postMessage({ uuid, text });
+  channel?.postMessage({ uuid, text, region: Deno.env.get('DENO_REGION') });
 
   channels.set(uuid, text);
 };
