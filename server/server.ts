@@ -60,4 +60,4 @@ server.get('/:uuid', ({ respond, params: { uuid }, cookies: { theme }, headers }
 server.get('/public/*', serve('./public/'));
 
 server.listen(8000);
-console.log('Server running on http://localhost:8000');
+console.log(`Server running on ${ Deno.env.get('DENO_REGION') }`);
