@@ -4,34 +4,43 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import { toggleTheme } from './theme.ts';
-import './websocket.ts';
-
 const $ = document.querySelector.bind(document);
 
-export const body = $('body')!;
-export const counter = $('#counter')!;
-export const textField = $('#text')! as HTMLTextAreaElement;
-export const themeButton = $('#theme')!;
+const body        = $('body')!;
+const counter     = $('#counter')!;
+const textField   = $('#text')! as HTMLTextAreaElement;
+const themeButton = $('#theme')!;
 
-export const uuid = location.pathname.slice(1);
+const uuid = location.pathname.slice(1);
 
-export const updateCounter = (text: string) => {
+const connect = () => {
+  const socket = new WebSocket(`${ location.protocol === 'https:' ? 'wss:' : 'ws:' }//${ location.host }/${ uuid }`);
+
+  textField.oninput = () => socket.send(getText());
+  socket.onmessage = ({ data }) => setText(data);
+  socket.onclose = () => setTimeout(connect, 2000);
+};
+
+const updateCounter = (text: string) => {
   counter.textContent = `${text.length}, ${
     text.split(/\s+/).filter(Boolean).length
   }`;
 };
 
-export const getText = () => {
+const getText = () => {
   return ($('#text') as HTMLTextAreaElement).value;
 };
 
-export const setText = (text: string) => {
+const setText = (text: string) => {
   ($('#text') as HTMLTextAreaElement).value = text;
+  updateCounter(text);
 };
 
-textField.addEventListener('input', () => {
-  updateCounter(getText());
+textField.oninput = () => updateCounter(getText());
+
+themeButton.addEventListener('click', () => {
+  body.classList.toggle('dark');
+  document.cookie = `theme=${ body.classList.contains('dark') ? 'dark' : 'light' }; path=/`;
 });
 
-themeButton.addEventListener('click', toggleTheme);
+connect();

@@ -1,0 +1,18 @@
+{
+  "version": "2",
+  "remote": {
+    "https://esm.sh/preact-render-to-string@6.2.1": "58876aaeb4ee239f22f87a360623a75da7893821ac83ad76d02d0e2cc3fd76ed",
+    "https://esm.sh/preact@10.17.1/jsx-runtime": "bd703f2946a838f2921f6a170bd00fe7589b469ee94d8250ee92ee8ac2a5b11c",
+    "https://esm.sh/stable/preact@10.17.0/denonext/preact.mjs": "38d273934e973d9698e98f053e89c1233b1102baf9800ceef0e22781c2702395",
+    "https://esm.sh/stable/preact@10.17.1/denonext/jsx-runtime.js": "0fa1261fdb2c1e2d75a528d82117726ac532e87b88f2b83e5a1cc50d9f9540c7",
+    "https://esm.sh/stable/preact@10.17.1/denonext/preact.mjs": "0f2f159289b4502eea839f4b57cef910ad03d63213ac5301e6767326b060d8f6",
+    "https://esm.sh/v131/preact-render-to-string@6.2.1/denonext/preact-render-to-string.mjs": "be9e441d5ec1de8459cd9c4639703e00ec442036d81faf00706b69a3310fdd3c",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/event.ts": "a6ae9eee8523f9ced37de8a5ec0fe0ba0f88443ae7cb0d06d1e844d32a04e62b",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/listen.ts": "ebe1b8bbdc8dbb1c4546d1caa0dcffb134ea6d41a5dc9693122a798c9900c92a",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/server.ts": "3d74c27d55fb53d682b3767c3c4468037e44140f961fd45ea3fe580610519765",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/utils/file.ts": "593f86afe6575506e49dff2bd1c69521a9c80ed6dbd1e4cb369571d9aff7fede",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/utils/mime-types.ts": "abc3998bd84c179adb1de6eea6c2a857f2debe769a58550f98a847dd4c22e6b1",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/lib/utils/serve.ts": "84c6c9c5274477173ccfd54a2b14a0632a3d7ae368ef81c4c9298e303ab2ea8c",
+    "https://raw.githubusercontent.com/agorushkin/http-server/main/mod.ts": "441a0c3e4330888fd3bb0b7c8bcef6b16f2fea57ecb4b83d26f03bf1fc4e03c4"
+  }
+}

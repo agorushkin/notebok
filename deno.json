@@ -2,7 +2,7 @@
   "importMap": "./import_map.json",
   "tasks": {
     "build": "deno bundle --config=deno.json --watch ./client/scripts/main/main.ts ./client/build/main.js",
-    "start": "deno run -A --config=deno.json --watch main.ts"
+    "start": "deno run -A --config=deno.json --watch server/server.ts"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
