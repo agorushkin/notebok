@@ -20,7 +20,10 @@ const connect = () => {
 
   client.onclose = () => setTimeout(connect, 1000);
 
-  client.onmessage = ({ data }) => input.value = data;
+  client.onmessage = ({ data }) => {
+    count.textContent = `${ data.length }, ${ data.split(/\s+/).filter(Boolean).length }`;
+    input.value = data;
+  }
 };
 
 input.oninput = () => {
