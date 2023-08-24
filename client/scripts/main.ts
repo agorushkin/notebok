@@ -6,48 +6,31 @@
 
 const $ = document.querySelector.bind(document);
 
-const body        = $('body')!;
-const counter     = $('#counter')!;
-const textField   = $('#text')! as HTMLTextAreaElement;
-const themeButton = $('#theme')!;
+const body  = $('body')!;
+const count = $('#counter')!;
+const input = $('#text')! as HTMLTextAreaElement;
+const theme = $('#theme')! as HTMLButtonElement;
+const uuid  = location.pathname.slice(1);
 
-const uuid = location.pathname.slice(1);
+let socket: WebSocket;
 
 const connect = () => {
-  const socket = new WebSocket(`${ location.protocol === 'https:' ? 'wss:' : 'ws:' }//${ location.host }/${ uuid }`);
+  const client = new WebSocket(`${ location.protocol === 'https:' ? 'wss:' : 'ws:' }//${ location.host }/${ uuid }`);
+  socket = client;
 
-  textField.addEventListener('input', () => socket.send(getText()));
-  socket.onclose = () => setTimeout(connect, 2000);
+  client.onclose = () => setTimeout(connect, 1000);
 
-  socket.onmessage = ({ data }) => {
-    setText(data);
-
-    console.log('Received: ', data);
-  };
+  client.onmessage = ({ data }) => input.value = data;
 };
 
-const updateCounter = (text: string) => {
-  counter.textContent = `${text.length}, ${
-    text.split(/\s+/).filter(Boolean).length
-  }`;
+input.oninput = () => {
+  count.textContent = `${ input.value.length }, ${ input.value.split(/\s+/).filter(Boolean).length }`;
+  socket?.send(input.value);
 };
 
-const getText = () => {
-  return ($('#text') as HTMLTextAreaElement).value;
-};
-
-const setText = (text: string) => {
-  ($('#text') as HTMLTextAreaElement).value = text;
-  updateCounter(text);
-};
-
-textField.addEventListener('input', () => {
-  updateCounter(textField.value);
-});
-
-themeButton.addEventListener('click', () => {
+theme.onclick = () => {
   body.classList.toggle('dark');
   document.cookie = `theme=${ body.classList.contains('dark') ? 'dark' : 'light' }; path=/`;
-});
+};
 
 connect();

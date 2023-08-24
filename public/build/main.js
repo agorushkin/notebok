@@ -4,34 +4,23 @@
 
 const $ = document.querySelector.bind(document);
 const body = $('body');
-const counter = $('#counter');
-const textField = $('#text');
-const themeButton = $('#theme');
+const count = $('#counter');
+const input = $('#text');
+const theme = $('#theme');
 const uuid = location.pathname.slice(1);
+let socket;
 const connect = ()=>{
-    const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
-    textField.addEventListener('input', ()=>socket.send(getText()));
-    socket.onclose = ()=>setTimeout(connect, 2000);
-    socket.onmessage = ({ data })=>{
-        setText(data);
-        console.log('Received: ', data);
-    };
+    const client = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
+    socket = client;
+    client.onclose = ()=>setTimeout(connect, 1000);
+    client.onmessage = ({ data })=>input.value = data;
 };
-const updateCounter = (text)=>{
-    counter.textContent = `${text.length}, ${text.split(/\s+/).filter(Boolean).length}`;
+input.oninput = ()=>{
+    count.textContent = `${input.value.length}, ${input.value.split(/\s+/).filter(Boolean).length}`;
+    socket?.send(input.value);
 };
-const getText = ()=>{
-    return $('#text').value;
-};
-const setText = (text)=>{
-    $('#text').value = text;
-    updateCounter(text);
-};
-textField.addEventListener('input', ()=>{
-    updateCounter(textField.value);
-});
-themeButton.addEventListener('click', ()=>{
+theme.onclick = ()=>{
     body.classList.toggle('dark');
     document.cookie = `theme=${body.classList.contains('dark') ? 'dark' : 'light'}; path=/`;
-});
+};
 connect();

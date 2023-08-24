@@ -8,7 +8,7 @@ const clients  = new Map<string, WebSocket[]>();
 const channels = new Map<string, string>();
 const channel  = Deno.env.get('DEPLOY') === 'true' ? new BroadcastChannel('network') : null;
 const server   = new Server();
-const region   = Deno.env.get('DENO_REGION');
+const region   = Deno.env.get('DENO_REGION') ?? 'local environment';
 
 if (channel) channel.onmessage = ({ data: { uuid, text, regions } }) => {
   if (regions.includes(region)) return;
