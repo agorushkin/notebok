@@ -11,8 +11,11 @@ const uuid = location.pathname.slice(1);
 const connect = ()=>{
     const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
     textField.oninput = ()=>socket.send(getText());
-    socket.onmessage = ({ data })=>setText(data);
     socket.onclose = ()=>setTimeout(connect, 2000);
+    socket.onmessage = ({ data })=>{
+        setText(data);
+        console.log('Received: ', data);
+    };
 };
 const updateCounter = (text)=>{
     counter.textContent = `${text.length}, ${text.split(/\s+/).filter(Boolean).length}`;
