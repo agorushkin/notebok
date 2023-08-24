@@ -2,7 +2,7 @@ import { Server, serve } from 'http';
 
 import { render } from 'preact/render';
 
-import { template } from '/client/main.tsx';
+import { template } from '/client/pages/main.tsx';
 
 const clients  = new Map<string, WebSocket[]>();
 const channels = new Map<string, string>();
@@ -52,7 +52,7 @@ server.get('/:uuid', ({ respond, params: { uuid }, cookies: { theme }, headers }
   respond({ body: render(template(text ?? '', theme === 'dark')), headers: { 'content-type': 'text/html' } });
 });
 
-server.get('/client/*', serve('./client/'));
+server.get('/public/*', serve('./public/'));
 
 server.listen(8000);
 console.log('Server running on http://localhost:8000');
