@@ -10,12 +10,17 @@ const theme = $('#theme');
 const uuid = location.pathname.slice(1);
 let socket;
 const connect = ()=>{
-    const client = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
-    socket = client;
-    client.onclose = ()=>setTimeout(connect, 1000);
-    client.onmessage = ({ data })=>{
+    socket = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/${uuid}`);
+    socket.onclose = ()=>{
+        input.disabled = true;
+        setTimeout(connect, 1000);
+    };
+    socket.onmessage = ({ data })=>{
         count.textContent = `${data.length}, ${data.split(/\s+/).filter(Boolean).length}`;
         input.value = data;
+    };
+    socket.onopen = ()=>{
+        input.disabled = false;
     };
 };
 input.oninput = ()=>{
