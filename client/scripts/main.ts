@@ -12,18 +12,24 @@ const input = $('#text')! as HTMLTextAreaElement;
 const theme = $('#theme')! as HTMLButtonElement;
 const uuid  = location.pathname.slice(1);
 
-let socket: WebSocket;
+let socket: WebSocket
 
 const connect = () => {
-  const client = new WebSocket(`${ location.protocol === 'https:' ? 'wss:' : 'ws:' }//${ location.host }/${ uuid }`);
-  socket = client;
+  socket = new WebSocket(`${ location.protocol === 'https:' ? 'wss:' : 'ws:' }//${ location.host }/${ uuid }`);
 
-  client.onclose = () => setTimeout(connect, 1000);
+  socket.onclose = () => {
+    input.disabled = true;
+    setTimeout(connect, 1000);
+  };
 
-  client.onmessage = ({ data }) => {
+  socket.onmessage = ({ data }) => {
     count.textContent = `${ data.length }, ${ data.split(/\s+/).filter(Boolean).length }`;
     input.value = data;
-  }
+  };
+
+  socket.onopen = () => {
+    input.disabled = false;
+  };
 };
 
 input.oninput = () => {

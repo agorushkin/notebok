@@ -4,56 +4,76 @@ import { render } from 'preact/render';
 
 import { template } from '/client/pages/main.tsx';
 
-const clients  = new Map<string, WebSocket[]>();
 const channels = new Map<string, string>();
-const channel  = Deno.env.get('DEPLOY') === 'true' ? new BroadcastChannel('network') : null;
-const server   = new Server();
-const region   = Deno.env.get('DENO_REGION') ?? 'local environment';
+const clients  = new Map<string, Set<WebSocket>>();
+const ids      = new Map<WebSocket, string>();
 
-if (channel) channel.onmessage = ({ data: { uuid, text, regions } }) => {
-  if (regions.includes(region)) return;
-  if (channels.get(uuid) === text) return;
+const region = Deno.env.get('DENO_REGION') ?? 'local';
+const server = new Server();
 
-  broadcast(uuid, text, [ ...regions, region ]);
+const channel = new BroadcastChannel('network');
+channel.onmessage = ({ data }: { data: Payload }) => {
+  data.origin = false;
+  broadcast(data);
 };
 
-const broadcast = (uuid: string, text: string, regions: string[] = []) => {
-  const [ ...sockets ] = clients.get(uuid) ?? [];
+interface Payload {
+  sender: string;
+  channel: string;
+  origin: boolean;
+  text: string;
+}
 
-  for (const socket of sockets) socket.send(text);
-  channel?.postMessage({ uuid, text, regions });
+const broadcast = (payload: Payload) => {
+  console.log(`[${ region }] ${ payload.sender } -> ${ payload.channel } (${ clients.get(payload.channel)?.size }): ${ payload.text }`)
 
-  channels.set(uuid, text);
+  const sockets = clients.get(payload.channel) ?? [];
+  if (payload.origin) channel.postMessage(payload);
+
+  for (const socket of sockets) socket.send(payload.text);
+  channels.set(payload.channel, payload.text);
 };
 
-const isUUID = (uuid: string) => /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(uuid);
+const create = (channel: string) => {
+  if (!channels.get(channel)) channels.set(channel, '');
+  if (!clients.get(channel))  clients.set(channel, new Set());
+
+  return channels.get(channel) ?? '';
+};
 
 server.get('/', ({ redirect }) => {
   const uuid = crypto.randomUUID();
   redirect(`/${ uuid }`);
 });
 
-server.get('/:uuid', async ({ upgrade, respond, params: { uuid }, headers }) => {
+server.get('/:channel', async ({ upgrade, respond, params: { channel }, headers }) => {
   if (headers['upgrade'] !== 'websocket') return;
-  if (!uuid || !isUUID(uuid)) return respond({ status: 400 });
+  if (!channel) return respond({ status: 400 });
 
   const socket = await upgrade();
   if (!socket) return;
 
-  socket.onmessage = ({ data }) => broadcast(uuid, data);
+  const id = crypto.randomUUID();
+
+  create(channel);
+
+  ids.set(socket, id);
+  clients.get(channel)?.add(socket);
+
+  console.log(`[${ region }] ${ channel }: ${ id }`);
+
+  socket.onmessage = ({ data }) => broadcast({ sender: id, channel, origin: true, text: data.toString() });
   socket.onclose = () => {
-    const [ ...sockets ] = clients.get(uuid) ?? [];
-    clients.set(uuid, sockets.filter(s => s !== socket));
+    clients.get(channel)?.delete(socket);
+    ids.delete(socket);
   };
-  
-  clients.get(uuid)?.push(socket);
 });
 
-server.get('/:uuid', ({ respond, params: { uuid }, cookies: { theme }, headers }) => {
+server.get('/:channel', ({ respond, params: { channel }, cookies: { theme }, headers }) => {
   if (headers['upgrade'] === 'websocket') return;
-  if (!uuid || !isUUID(uuid)) return respond({ status: 400 });
+  if (!channel) return respond({ status: 400 });
 
-  const text = channels.get(uuid);
+  const text = create(channel);
 
   respond({ body: render(template(text ?? '', theme === 'dark')), headers: { 'content-type': 'text/html' } });
 });
