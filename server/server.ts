@@ -6,7 +6,7 @@ import { template } from '/client/pages/main.tsx';
 
 const channels = new Map<string, string>();
 const clients  = new Map<string, Set<WebSocket>>();
-const ids      = new Map<WebSocket, string>();
+const uuids    = new Map<WebSocket, string>();
 
 const region = Deno.env.get('DENO_REGION') ?? 'local';
 const server = new Server();
@@ -34,7 +34,7 @@ const broadcast = (payload: Payload) => {
     channel.postMessage(payload);
   }
 
-  for (const socket of sockets) if (ids.get(socket) !== payload.sender) socket.send(payload.text);
+  for (const socket of sockets) if (uuids.get(socket) !== payload.sender) socket.send(payload.text);
   channels.set(payload.channel, payload.text);
 };
 
@@ -61,7 +61,7 @@ server.get('/:channel', async ({ upgrade, respond, params: { channel }, headers 
 
   create(channel);
 
-  ids.set(socket, id);
+  uuids.set(socket, id);
   clients.get(channel)?.add(socket);
 
   console.log(`[${ region }] ${ channel } (channel, ${ clients.get(channel)?.size }) : ${ id } (client, open)`);
@@ -69,7 +69,7 @@ server.get('/:channel', async ({ upgrade, respond, params: { channel }, headers 
   socket.onmessage = ({ data }) => broadcast({ sender: id, channel, origin: true, text: data.toString() });
   socket.onclose = () => {
     clients.get(channel)?.delete(socket);
-    ids.delete(socket);
+    uuids.delete(socket);
     
     console.log(`[${ region }] ${ channel } (channel, ${ clients.get(channel)?.size }) : ${ id } (client, closed)`);
   };
