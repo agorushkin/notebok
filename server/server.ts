@@ -30,7 +30,7 @@ const broadcast = (payload: Payload) => {
   const sockets = clients.get(payload.channel) ?? [];
   if (payload.origin) channel.postMessage(payload);
 
-  for (const socket of sockets) socket.send(payload.text);
+  for (const socket of sockets) if (ids.get(socket) !== payload.sender) socket.send(payload.text);
   channels.set(payload.channel, payload.text);
 };
 
