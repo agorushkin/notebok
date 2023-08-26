@@ -13,6 +13,7 @@ const server = new Server();
 
 const channel = new BroadcastChannel('network');
 channel.onmessage = ({ data }: { data: Payload }) => {
+  console.log(`[${ region }] ${ data.sender } (client, network) -> ${ data.channel } (channel, local, ${ clients.get(data.channel)?.size }) { ${ data.text.length ?? 0 } }`);
   data.origin = false;
   broadcast(data);
 };
@@ -25,10 +26,13 @@ interface Payload {
 }
 
 const broadcast = (payload: Payload) => {
-  console.log(`[${ region }] ${ payload.sender } -> ${ payload.channel } (${ clients.get(payload.channel)?.size }): ${ payload.text }`)
+  console.log(`[${ region }] ${ payload.sender } (client, ${ payload.origin ? 'broadcast' : 'network' }) -> ${ payload.channel } (channel, ${ clients.get(payload.channel)?.size }) { ${ payload.text.length ?? 0 } }`);
 
   const sockets = clients.get(payload.channel) ?? [];
-  if (payload.origin) channel.postMessage(payload);
+  if (payload.origin) {
+    console.log(`[${ region }] ${ payload.channel } (channel, broadcast) -> network { ${ payload.text.length ?? 0 } }`);
+    channel.postMessage(payload);
+  }
 
   for (const socket of sockets) if (ids.get(socket) !== payload.sender) socket.send(payload.text);
   channels.set(payload.channel, payload.text);
@@ -60,12 +64,14 @@ server.get('/:channel', async ({ upgrade, respond, params: { channel }, headers 
   ids.set(socket, id);
   clients.get(channel)?.add(socket);
 
-  console.log(`[${ region }] ${ channel }: ${ id }`);
+  console.log(`[${ region }] ${ channel } (channel, ${ clients.get(channel)?.size }) : ${ id } (client, open)`);
 
   socket.onmessage = ({ data }) => broadcast({ sender: id, channel, origin: true, text: data.toString() });
   socket.onclose = () => {
     clients.get(channel)?.delete(socket);
     ids.delete(socket);
+    
+    console.log(`[${ region }] ${ channel } (channel, ${ clients.get(channel)?.size }) : ${ id } (client, closed)`);
   };
 });
 
